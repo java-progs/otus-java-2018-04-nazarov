@@ -78,7 +78,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <obfuscate>false</obfuscate>
+                    <obfuscate>true</obfuscate>
                     <injar>${project_name}.jar</injar>
                     <outjar>${project_name}_obfuscation.jar</outjar>
                     <outputDirectory>${project.build.directory}</outputDirectory>
