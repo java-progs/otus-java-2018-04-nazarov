@@ -2,7 +2,6 @@ package ru.otus.java.dz1_1;
 
 import com.google.common.base.Splitter;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 /*
