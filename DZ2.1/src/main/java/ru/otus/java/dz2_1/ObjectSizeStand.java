@@ -38,14 +38,7 @@ public class ObjectSizeStand {
         for (int i = 0; i < countElements; i++) {
             arrString[i] = new String(i + "");
         }
-
-        long fullSize = getObjectSize(arrString);
-
-        for (int i = 0; i < arrString.length; i++) {
-            fullSize += getObjectSize(arrString[i]);
-        }
-
-        printObjectSize(String.format("Filled of %s elements %s", arrString.length, getObjectName(arrString)), fullSize);
+        printObjectSize(String.format("Filled of %s elements %s", arrString.length, getObjectName(arrString)), getObjectSize(arrString));
 
         // ArrayList из 500 000 элементов
         ArrayList<String> alStr = new ArrayList<>();
@@ -53,12 +46,7 @@ public class ObjectSizeStand {
         for (int i = 0; i < countElements / 2; i++) {
             alStr.add("String " + i);
         }
-
-        fullSize = getObjectSize(alStr);
-        for (int i = 0; i < alStr.size(); i++) {
-            fullSize += getObjectSize(alStr.get(i));
-        }
-        printObjectSize(String.format("Filled of %s elements %s", alStr.size(), getObjectName(alStr)), fullSize);
+        printObjectSize(String.format("Filled of %s elements %s", alStr.size(), getObjectName(alStr)), getObjectSize(alStr));
 
         // ArrayList из 1 000 000 элементов
         alStr = new ArrayList<>();
@@ -66,12 +54,7 @@ public class ObjectSizeStand {
         for (int i = 0; i < countElements; i++) {
             alStr.add("String " + i);
         }
-
-        fullSize = getObjectSize(alStr);
-        for (int i = 0; i < alStr.size(); i++) {
-            fullSize += getObjectSize(alStr.get(i));
-        }
-        printObjectSize(String.format("Filled of %s elements %s", alStr.size(), getObjectName(alStr)), fullSize);
+        printObjectSize(String.format("Filled of %s elements %s", alStr.size(), getObjectName(alStr)), getObjectSize(alStr));
 
         // HashSet из 500 000 элементов
         HashSet<Integer> hsInteger = new HashSet<Integer>();
@@ -79,12 +62,7 @@ public class ObjectSizeStand {
         for (int i = 0; i < (countElements / 2); i++) {
             hsInteger.add(i);
         }
-
-        fullSize = getObjectSize(hsInteger);
-        for (Integer intVal : hsInteger) {
-            fullSize += getObjectSize(intVal);
-        }
-        printObjectSize(String.format("Filled of %s elements %s", hsInteger.size(), getObjectName(hsInteger)), fullSize);
+        printObjectSize(String.format("Filled of %s elements %s", hsInteger.size(), getObjectName(hsInteger)), getObjectSize(hsInteger));
 
         // HashSet из 1 000 000 элементов
         hsInteger = new HashSet<>();
@@ -92,12 +70,7 @@ public class ObjectSizeStand {
         for (int i = 0; i < countElements; i++) {
             hsInteger.add(i);
         }
-
-        fullSize = getObjectSize(hsInteger);
-        for (Integer intVal : hsInteger) {
-            fullSize += getObjectSize(intVal);
-        }
-        printObjectSize(String.format("Filled of %s elements %s", hsInteger.size(), getObjectName(hsInteger)), fullSize);
+        printObjectSize(String.format("Filled of %s elements %s", hsInteger.size(), getObjectName(hsInteger)), getObjectSize(hsInteger));
 
     }
 
