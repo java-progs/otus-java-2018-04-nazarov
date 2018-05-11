@@ -3,11 +3,10 @@ package ru.otus.java.DZ3_1;
 import java.util.*;
 
 public class MyArrayList<T> implements List<T> {
-
     private int MAX_ARRAY_SIZE = Integer.MAX_VALUE;
     private final int INITIAL_SIZE = 16;
     private int capacity;
-    private int pointer = -1;
+    private int pointer = 0;
     private Object[] arrayList;
 
     public MyArrayList() {
@@ -24,39 +23,16 @@ public class MyArrayList<T> implements List<T> {
         arrayList = new Object[this.capacity];
     }
 
-    private boolean increaseArraySize() throws IndexOutOfBoundsException {
-        // Если достигнут максимальный размер массива, пытаемся увеличить размер в 2 раза
-        if (pointer + 1 == capacity) {
-            if (capacity == MAX_ARRAY_SIZE) {
-                throw new IndexOutOfBoundsException(String.format("Maximum array size %s exceeded", MAX_ARRAY_SIZE));
-            }
-
-            if ((MAX_ARRAY_SIZE - capacity) >= capacity) {
-                capacity = capacity * 2;
-            } else {
-                capacity = MAX_ARRAY_SIZE;
-            }
-
-            Object[] arrayTmp = new Object[capacity];
-            System.arraycopy(arrayList, 0, arrayTmp, 0, pointer+1);
-            arrayList = arrayTmp;
-
-            return true;
-        }
-
-        return false;
-    }
-
     private boolean increaseArraySize(int count) throws IndexOutOfBoundsException {
         // Если размер добавляемого массива больше чем свободно элементов в целевом массиве
-        if (capacity - (pointer + 1) <= count) {
+        if (capacity - (pointer) < count) {
 
-            if (MAX_ARRAY_SIZE - count < pointer + 1) {
+            if (MAX_ARRAY_SIZE - count < pointer) {
                 throw new IndexOutOfBoundsException(String.format("Maximum array size %s exceeded. Pointer %s, add count %s", MAX_ARRAY_SIZE, pointer, count));
             }
 
             // Увеличиваем размер массива кратно capacity
-            while (capacity < pointer + 1 + count) {
+            while (capacity < pointer + count) {
 
                 if (MAX_ARRAY_SIZE - capacity < capacity) {
                     capacity = MAX_ARRAY_SIZE;
@@ -65,8 +41,7 @@ public class MyArrayList<T> implements List<T> {
                 }
             }
 
-            Object[] arrayTmp = new Object[capacity];
-            System.arraycopy(arrayList, 0, arrayTmp, 0, pointer+1);
+            Object[] arrayTmp = Arrays.copyOf(arrayList, capacity);
             arrayList = arrayTmp;
 
             return true;
@@ -77,19 +52,19 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public int size() {
-        return pointer+1;
+        return pointer;
     }
 
     @Override
     public boolean isEmpty() {
-        return pointer == -1;
+        return pointer == 0;
     }
 
     @Override
     public boolean add(T t) {
         try {
-            increaseArraySize();
-            arrayList[++pointer] = t;
+            increaseArraySize(1);
+            arrayList[pointer++] = t;
             return true;
         } catch (IndexOutOfBoundsException e) {
             return false;
@@ -98,26 +73,26 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public T get(int index) throws IndexOutOfBoundsException {
-        if (index >= 0 && index <= pointer) {
+        if (index >= 0 && index < pointer) {
             return (T) arrayList[index];
         }
-        throw new IndexOutOfBoundsException("index " + index);
+        throw new IndexOutOfBoundsException(String.format("Index: %s, Size: %s", index, size()));
     }
 
     @Override
     public T set(int index, T element) throws IndexOutOfBoundsException {
-        if (index >= 0 && index <= pointer) {
+        if (index >= 0 && index < pointer) {
             T oldElement = (T) arrayList[index];
             arrayList[index] = element;
             return oldElement;
         } else {
-            throw new IndexOutOfBoundsException("index " + index);
+            throw new IndexOutOfBoundsException(String.format("Index: %s, Size: %s", index, size()));
         }
     }
 
     @Override
     public T remove(int index) throws IndexOutOfBoundsException {
-        if (index >= 0 && index <= pointer) {
+        if (index >= 0 && index < pointer) {
             T oldElement = (T) arrayList[index];
             for (int i = index; i < pointer; i++) {
                 arrayList[i] = arrayList[i+1];
@@ -125,7 +100,7 @@ public class MyArrayList<T> implements List<T> {
             pointer--;
             return oldElement;
         } else {
-            throw new IndexOutOfBoundsException("index " + index);
+            throw new IndexOutOfBoundsException(String.format("Index: %s, Size: %s", index, size()));
         }
     }
 
@@ -133,7 +108,7 @@ public class MyArrayList<T> implements List<T> {
     public boolean addAll(Collection<? extends T> c) {
         Object[] array = c.toArray();
         increaseArraySize(array.length);
-        System.arraycopy(array, 0, arrayList, pointer + 1, array.length);
+        System.arraycopy(array, 0, arrayList, pointer, array.length);
         pointer += array.length;
         return true;
     }
@@ -239,7 +214,7 @@ public class MyArrayList<T> implements List<T> {
 
         @Override
         public boolean hasNext() {
-            if (iteratorPointer <= pointer) {
+            if (iteratorPointer < pointer) {
                 return true;
             }
             return false;
@@ -247,9 +222,9 @@ public class MyArrayList<T> implements List<T> {
 
         @Override
         public T next() throws NoSuchElementException {
-            if (iteratorPointer <= pointer) {
-                lastReturnPointer = iteratorPointer++;
-                return (T) arrayList[lastReturnPointer];
+            if (iteratorPointer < pointer) {
+                lastReturnPointer = iteratorPointer;
+                return (T) arrayList[++iteratorPointer];
             } else {
                 throw new NoSuchElementException();
             }
@@ -266,7 +241,7 @@ public class MyArrayList<T> implements List<T> {
         @Override
         public T previous() throws NoSuchElementException {
             if (iteratorPointer > 0) {
-                lastReturnPointer = --iteratorPointer;
+                lastReturnPointer = iteratorPointer--;
                 return (T) arrayList[lastReturnPointer];
             } else {
                 throw new NoSuchElementException();
@@ -275,7 +250,7 @@ public class MyArrayList<T> implements List<T> {
 
         @Override
         public int nextIndex() {
-            if (iteratorPointer < pointer) {
+            if (iteratorPointer < pointer - 1) {
                 return iteratorPointer + 1;
             } else {
                 return size();
@@ -310,4 +285,5 @@ public class MyArrayList<T> implements List<T> {
             throw new UnsupportedOperationException("add(T t)");
         }
     }
+
 }
