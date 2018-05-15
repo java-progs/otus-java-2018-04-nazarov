@@ -1,0 +1,30 @@
+-Xmx1024m -Xms1024m -XX:+UseSerialGC
+Young Generation. Name : Copy, Count 6, Total duration : 1066 ms
+Average duration per minute : 0.005168911 m
+
+Old Generation. Name : MarkSweepCompact, Count 4, Total duration : 5048 ms
+Average duration per minute : 0.01244803 m
+
+
+-Xmx1024m -Xms1024m -XX:+UseParallelGC
+Young Generation. Name : PS Scavenge, Count 6, Total duration : 803 ms
+Average duration per minute : 0.0039387844 m
+
+Old Generation. Name : PS MarkSweep, Count 6, Total duration : 17838 ms
+Average duration per minute : 0.06864307 m
+
+
+-Xmx1024m -Xms1024m -XX:+UseConcMarkSweepGC
+Young Generation. Name : ParNew, Count 9, Total duration : 1398 ms
+Average duration per minute : 0.0049658995 m
+
+Old Generation. Name : ConcurrentMarkSweep, Count 36, Total duration : 88978 ms
+Average duration per minute : 0.3122506 m
+
+
+-Xmx1024m -Xms1024m -XX:+UseG1GC
+Young Generation. Name : G1 Young Generation, Count 54, Total duration : 4466 ms
+Average duration per minute : 0.013292023 m
+
+Old Generation. Name : G1 Old Generation, Count 12, Total duration : 24536 ms
+Average duration per minute : 0.07294218 m
