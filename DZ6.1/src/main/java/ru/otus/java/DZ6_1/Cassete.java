@@ -3,7 +3,7 @@ package ru.otus.java.DZ6_1;
 /**
  * Created by operator on 24.05.2018.
  */
-public class Cassete extends Device {
+public class Cassete {
 
     private String name = "NoName";
     private int capacity = 0;
@@ -84,12 +84,10 @@ public class Cassete extends Device {
         return count;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public CasseteStates getState() {
         return state;
     }
