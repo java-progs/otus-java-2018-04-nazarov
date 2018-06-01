@@ -1,5 +1,8 @@
 package ru.otus.java.DZ6_1;
 
+import ru.otus.java.DZ6_1.Commands.*;
+import ru.otus.java.DZ6_1.Devices.ATM;
+
 import java.util.*;
 
 /**
@@ -12,8 +15,9 @@ public class ATMWork{
     public static void main(String args[]) {
 
         ATM atm = new ATM();
+        Command command = new PrintStateCommand(atm);
 
-        atm.printState();
+        executeCommand(command);
 
         Scanner sc = new Scanner(System.in);
         boolean work = true;
@@ -30,58 +34,18 @@ public class ATMWork{
             System.out.println();
             System.out.println("Enter position: ");
 
-
             int position = sc.nextInt();
+            command = new EmptyCommand(atm);
 
             switch (position) {
                 case 1:
-                    System.out.println();
-                    System.out.println("===== Withdrawal =====");
-                    String withdrawalState = atm.getWithdrawalState();
-                    if (withdrawalState.equals(atm.WITHDRAWAL_NOT_AVAILABLE)) {
-                        System.out.println(atm.WITHDRAWAL_NOT_AVAILABLE);
-                        break;
-                    }
-                    System.out.println("Enter withdrawal amount: ");
-                    int amount = sc.nextInt();
-                    boolean operationResult = atm.withdrawal(amount);
-                    if (!operationResult) {
-                        System.out.println("ATM can't withdraw cash");
-                    } else {
-                        System.out.println("Please take your cash");
-                    }
+                    command = new WithdrawalCommand(atm);
                     break;
                 case 2:
-                    System.out.println();
-                    System.out.println("===== Cash-in =====");
-                    System.out.println("Available denominations for cash deposits: ");
-                    String cashInState = atm.getCashInState();
-                    System.out.println(cashInState);
-                    if (cashInState.equals(atm.CASH_IN_NOT_AVAILABLE)) break;
-                    TreeSet<Integer> nominals = atm.getCashInNominals();
-                    HashMap<Integer, Integer> notes = new HashMap<>();
-                    System.out.println("Please, enter the number of notes: ");
-                    for (Integer nominal : nominals) {
-                        System.out.print(nominal + " : ");
-                        int count = sc.nextInt();
-                        notes.put(nominal, count);
-                    }
-
-                    System.out.println("Your deposit :");
-                    for (Map.Entry<Integer, Integer> pair : notes.entrySet()) {
-                        System.out.print(pair.getKey() + " : " + pair.getValue() + " notes. ");
-                    }
-                    System.out.println();
-                    boolean depositResult = atm.deposit(notes);
-                    if (depositResult) {
-                        System.out.println("Success deposit : " + depositResult);
-                    } else {
-                        System.out.println("ATM can't deposit cash");
-                        System.out.println("Please take your cash");
-                    }
+                    command = new CashInCommand(atm);
                     break;
                 case 3:
-                    atm.printState();
+                    command = new PrintStateCommand(atm);
                     break;
                 case 4:
                     work = false;
@@ -89,6 +53,13 @@ public class ATMWork{
                 default:
                     break;
             }
+
+            executeCommand(command);
         }
+
+    }
+
+    private static void executeCommand(Command command) {
+        command.execute();
     }
 }

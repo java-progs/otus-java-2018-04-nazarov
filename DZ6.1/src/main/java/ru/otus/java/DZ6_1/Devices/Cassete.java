@@ -1,56 +1,56 @@
-package ru.otus.java.DZ6_1;
+package ru.otus.java.DZ6_1.Devices;
 
 /**
  * Created by operator on 24.05.2018.
  */
 public class Cassete {
 
-    private String name = "NoName";
-    private int capacity = 0;
-    private int nominal = 0;
-    private int count = 0;
-    private CasseteStates state = CasseteStates.NO_INITIALIZE;
+    private String name;
+    private int capacity;
+    private CasseteNominals nominal;
+    private int count;
 
     public Cassete() {
-        updateState();
+        name = "NoName";
+        capacity = 0;
+        nominal = CasseteNominals.NO;
+        count = 0;
     }
 
-    public Cassete(String name, int nominal, int capacity) {
+    public Cassete(String name, CasseteNominals nominal, int capacity) {
         this.name = name;
         this.nominal = nominal;
         this.capacity = capacity;
-        updateState();
     }
 
 
     public CasseteStates setName(String name) {
         this.name = name;
-        updateState();
 
-        return state;
+        return getState();
     }
 
     public CasseteStates setCapacity(int capacity) {
         this.capacity = capacity;
-        updateState();
 
-        return state;
+        return getState();
     }
 
-    public CasseteStates setNominal(int nominal) {
+    public CasseteStates setNominal(CasseteNominals nominal) {
         this.nominal = nominal;
-        updateState();
 
-        return state;
+        return getState();
     }
 
 
     public boolean addNotes(int addCount) {
+        CasseteStates state;
+
+        state = getState();
         if (state == CasseteStates.WORK || state == CasseteStates.CASSETE_EMPTY) {
             if (capacity - count >= addCount) {
                 count += addCount;
 
-                updateState();
                 return true;
             }
         }
@@ -61,7 +61,6 @@ public class Cassete {
     public boolean getNotes(int getCount) {
         if (count >= getCount) {
             count -= getCount;
-            updateState();
 
             return true;
         }
@@ -69,11 +68,11 @@ public class Cassete {
     }
 
     public int getBalance() {
-        return count * nominal;
+        return count * nominal.getNominal();
     }
 
     public int getNominal() {
-        return nominal;
+        return nominal.getNominal();
     }
 
     public int getCapacity() {
@@ -89,11 +88,9 @@ public class Cassete {
     }
 
     public CasseteStates getState() {
-        return state;
-    }
+        CasseteStates state;
 
-    private void updateState() {
-        if (capacity <= 0 || nominal <= 0 || name.equals("NoName") || name.length() == 0) {
+        if (capacity <= 0 || nominal == CasseteNominals.NO || name.equals("NoName") || name.length() == 0) {
             state = CasseteStates.NO_INITIALIZE;
         } else if (count == capacity) {
             state = CasseteStates.CASSETE_FULL;
@@ -103,5 +100,7 @@ public class Cassete {
             state = CasseteStates.CASSETE_EMPTY;
         }
 
+        return state;
     }
+
 }

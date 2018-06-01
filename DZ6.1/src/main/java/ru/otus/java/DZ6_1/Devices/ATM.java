@@ -1,4 +1,4 @@
-package ru.otus.java.DZ6_1;
+package ru.otus.java.DZ6_1.Devices;
 
 import java.util.*;
 
@@ -11,7 +11,7 @@ public class ATM {
     public final String WITHDRAWAL_NOT_AVAILABLE = "Withdrawal not available";
     private final int MAX_CASSETES_COUNT = 5;
 
-    public Cassete[] cassetes = new Cassete[MAX_CASSETES_COUNT];
+    private Cassete[] cassetes = new Cassete[MAX_CASSETES_COUNT];
     CasseteManager cassManager = new CasseteManager(cassetes);
 
     public ATM() {
@@ -19,30 +19,23 @@ public class ATM {
         balancingAtm();
     }
 
-    public boolean withdrawal(int amount) {
-        if (amount <= 0) return false;
-        if (getBalance() < amount) return false;
-
-        return getBills(amount);
+    public void withdrawal(int amount) throws WithdrawalException {
+         cassManager.getMinCountNotes(amount);
     }
 
-    private boolean getBills(int amount) {
-        return cassManager.getMinCountNotes(amount);
-    }
 
     public void initAtm() {
-        cassetes[0] = new Cassete("A", 500, 10);
-        cassetes[1] = new Cassete("B", 1000, 10);
-        cassetes[2] = new Cassete("C", 2000, 10);
-        cassetes[3] = new Cassete("D", 100, 10);
-        cassetes[4] = new Cassete("E", 1000, 10);
+        cassetes[0] = new Cassete("A", CasseteNominals.FIFTY, 10);
+        cassetes[1] = new Cassete("B", CasseteNominals.ONE_THOUSAND, 10);
+        cassetes[2] = new Cassete("C", CasseteNominals.TWO_THOUSAND, 10);
+        cassetes[3] = new Cassete("D", CasseteNominals.HUNDRED, 10);
+        cassetes[4] = new Cassete("E", CasseteNominals.ONE_THOUSAND, 10);
 
         cassManager.init();
     }
 
     public void balancingAtm() {
         cassetes[0].addNotes(5);
-        //cassetes[1].addNotes(1);
         cassetes[1].addNotes(7);
         cassetes[3].addNotes(10);
         cassetes[4].addNotes(10);
@@ -70,7 +63,7 @@ public class ATM {
     }
 
     public String getCashInState() {
-        TreeSet<Integer> nominals = cassManager.getCashInNominals();
+        Set<Integer> nominals = cassManager.getCashInNominals();
         if (nominals.size() > 0) {
             StringBuilder result = new StringBuilder();
             for (Integer nominal : nominals) {
@@ -83,12 +76,12 @@ public class ATM {
         }
     }
 
-    public TreeSet<Integer> getCashInNominals() {
+    public Set<Integer> getCashInNominals() {
         return cassManager.getCashInNominals();
     }
 
-    public boolean deposit(HashMap<Integer, Integer> notes) {
-        return cassManager.deposit(notes);
+    public void deposit(HashMap<Integer, Integer> notes) throws CashInException{
+        cassManager.deposit(notes);
     }
 
     private class CasseteManager {
@@ -100,7 +93,7 @@ public class ATM {
         }
 
         // TreeMap. K - номинал кассеты, V - ArrayList кассет данного номинала
-        private Map<Integer, ArrayList<Cassete>> cassetes = new TreeMap<Integer, ArrayList<Cassete>>(new Comparator<Integer>()
+        private Map<Integer, List<Cassete>> cassetes = new TreeMap<Integer, List<Cassete>>(new Comparator<Integer>()
         {
             @Override
             public int compare(Integer o1, Integer o2) {
@@ -116,7 +109,7 @@ public class ATM {
         }
 
         private void put(Cassete newCassete) {
-            ArrayList<Cassete> alCas = cassetes.get(newCassete.getNominal());
+            List<Cassete> alCas = cassetes.get(newCassete.getNominal());
             if (alCas == null) {
                 alCas = new ArrayList<>();
             }
@@ -125,7 +118,7 @@ public class ATM {
         }
 
         public void printCassetesList() {
-            for (Map.Entry<Integer, ArrayList<Cassete>> pair : cassetes.entrySet()) {
+            for (Map.Entry<Integer, List<Cassete>> pair : cassetes.entrySet()) {
                 System.out.print("Nominal : " + pair.getKey());
                 for (Cassete c : pair.getValue()) {
                     System.out.print(". Cassete : " + c.getName() + ", state : " + c.getState() + ", notes : " + c.getCount());
@@ -137,7 +130,7 @@ public class ATM {
         // Возвращает сумму по всем касетам
         public int getBalance() {
             int balance = 0;
-            for (Map.Entry<Integer, ArrayList<Cassete>> pair : cassetes.entrySet()) {
+            for (Map.Entry<Integer, List<Cassete>> pair : cassetes.entrySet()) {
                 for (Cassete c : pair.getValue()) {
                     balance += c.getBalance();
                 }
@@ -147,9 +140,9 @@ public class ATM {
 
 
         // Возвращает сумму доступных номиналов для вложения
-        public TreeSet<Integer> getCashInNominals() {
+        public Set<Integer> getCashInNominals() {
             TreeSet<Integer> nominals = new TreeSet<>();
-            for (Map.Entry<Integer, ArrayList<Cassete>> pair : cassetes.entrySet()) {
+            for (Map.Entry<Integer, List<Cassete>> pair : cassetes.entrySet()) {
                 boolean addNominal = false;
                 for (Cassete c : pair.getValue()) {
                     if (c.getState() == CasseteStates.CASSETE_EMPTY || c.getState() == CasseteStates.WORK) addNominal = true;
@@ -161,10 +154,13 @@ public class ATM {
         }
 
         // Набор суммы минимальным числом купюр
-        public boolean getMinCountNotes(int amount) {
-            if (amount > getBalance()) {
-                return false;
-            }
+        public void getMinCountNotes(int amount) throws WithdrawalException {
+
+            int originalAmount = amount;
+
+            if (amount <= 0) throw new WithdrawalException(String.format("Invalid amount %s", amount));
+
+            if (amount > getBalance()) throw new WithdrawalException(String.format("ATM can't withdraw cash. Amount %s", amount));
 
 
             // HashMap для хранения ссылки на кассету и количества банкнот, которые необходимо из нее взять
@@ -173,7 +169,7 @@ public class ATM {
             // Проверяем возможность набрать запрошенную клиентом сумму
             // Т.к. список номиналов отсортирован в cassetes по убыванию, то начинаем набирать сумму
             // последовательно с первого элемента
-            for (Map.Entry<Integer, ArrayList<Cassete>> pair : cassetes.entrySet()) {
+            for (Map.Entry<Integer, List<Cassete>> pair : cassetes.entrySet()) {
                 int countNotes = amount / pair.getKey();
                 if (countNotes > 0)
                     for (Cassete c : pair.getValue()) {
@@ -196,13 +192,13 @@ public class ATM {
                     pair.getKey().getNotes(pair.getValue());
                     System.out.println("Cassete : " + pair.getKey().getName() + ", Nominal : " + pair.getKey().getNominal() + ", Notes : " + pair.getValue());
                 }
-                return true;
+                return;
             } else {
-                return false;
+                throw new WithdrawalException(String.format("ATM can't withdraw cash. Amount %s", originalAmount));
             }
         }
 
-        public boolean deposit(HashMap<Integer, Integer> notes) {
+        public void deposit(Map<Integer, Integer> notes) throws CashInException {
 
             // HashMap для хранения ссылки на кассету и количества банкнот, которые необходимо в нее положить
             Map<Cassete, Integer> countNotesToCassete = new HashMap<>();
@@ -210,6 +206,8 @@ public class ATM {
             for (Map.Entry<Integer, Integer> pair : notes.entrySet()) {
                 int nominal = pair.getKey();
                 int count = pair.getValue();
+
+                if (count < 0) throw new CashInException(String.format("Invalid notes count. Nominal %s, count %s\nATM can't deposit cash", nominal, count));
 
                 // Проверяем возможность разложить купюры по кассетам
                 for (Cassete c : cassetes.get(nominal)) {
@@ -221,15 +219,13 @@ public class ATM {
                     count -= countToCassete;
                     if (count == 0) break;
                 }
-                if (count != 0) return false;
+                if (count != 0) throw new CashInException("ATM can't deposit cash\nPlease take your cash");
             }
 
             // Раскладываем купюры по кассетам
             for (Map.Entry<Cassete, Integer> pair : countNotesToCassete.entrySet()) {
                 pair.getKey().addNotes(pair.getValue());
             }
-
-            return true;
         }
 
     }
