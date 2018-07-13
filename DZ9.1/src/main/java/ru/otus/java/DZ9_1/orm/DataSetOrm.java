@@ -95,6 +95,7 @@ public class DataSetOrm {
 
         try (DBService dbService = new DBService()) {
             long id = dbService.insertQuery(query);
+            obj.setId(id);
         } catch (Exception e) {
             e.printStackTrace();
         }
